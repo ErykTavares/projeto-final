@@ -21,9 +21,11 @@
     });
 
     Router::get("/chamado", function() use($calledController){
-        if(isset($_GET['token'])){
+        $token = $_GET['token'];
+        if(isset($token)){
             if($calledController->existingToken()){
-                $calledController->index();
+                $info = $calledController->getInfo($token);
+                $calledController->index($info);
             }
             else{
                 die("O token está setado, porém não existe");

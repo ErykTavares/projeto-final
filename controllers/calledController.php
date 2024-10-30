@@ -3,8 +3,8 @@
 
     class CalledController{
 
-        public function index() {
-            \views\MainView::render("called");
+        public function index($info) {
+            \views\MainView::render("called", $info);
         }
 
         public function existingToken() {
@@ -19,6 +19,13 @@
             else{
                 return false;
             }
+        }
+
+        public function getInfo ($token){
+            $sql = \MySql::startConnection()->prepare(" SELECT * FROM called WHERE called_token = ?");
+
+            $sql->execute(array($token));
+            return $sql->fetch();
         }
     }
 
