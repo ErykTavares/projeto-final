@@ -27,7 +27,7 @@ Abrir Chamado!
                 $mail->addAddress($email, '');    
                 
                 $mail->isHTML(true);        
-                $mail->charSet = "UTF-8";                        //Set email format to HTML
+                $mail->CharSet = "UTF-8";                        //Set email format to HTML
                 $mail->Subject = 'Seu chamado foi aberto!';
                 $mail->Body    = $details;
                 $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
