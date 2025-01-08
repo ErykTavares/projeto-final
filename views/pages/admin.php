@@ -89,6 +89,20 @@
     <h2>Novos chamados</h2>
 
     <div class="asks-wrapper">
+        <?php
+        if (isset($_POST['reply'])) {
+            $token = $_POST['token'];
+            $email = $_POST['email'];
+            $calledResponse = $_POST['calledResponse'];
+
+            $sql = \MySql::startConnection()->prepare("INSERT INTO call_response VALUES (null,?,?,? )");
+            $sql->execute([$token, $calledResponse, "admin"]);
+
+            echo '<script>alert("Mensagem enviada!")</script>';
+        }
+
+
+        ?>
 
         <?php
 
@@ -101,7 +115,6 @@
             $checkCalled = \MySql::startConnection()->prepare("SELECT * FROM call_response WHERE id_called = '$value[called_token]'");
             $checkCalled->execute();
             if ($checkCalled->rowCount() >= 1) {
-
                 continue;
             }
 
@@ -113,7 +126,7 @@
                     <textarea placeholder="Sua Resposta" name="calledResponse"></textarea>
                     <br>
                     <br>
-                    <input class="submit-button" type="submit" name="post" value="Responder">
+                    <input class="submit-button" type="submit" name="reply" value="Responder">
                     <input type="hidden" name="token" value="<?php echo $value['called_token']; ?>">
                     <input type="hidden" name="email" value="<?php echo $value["email"]; ?>">
                 </form>
