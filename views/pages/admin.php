@@ -34,7 +34,9 @@
         box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     }
 
-
+    .title {
+        margin-bottom: 2rem
+    }
 
     .submit-button {
         background-color: #13aa52;
@@ -86,22 +88,37 @@
 
 
 <div class="container">
-    <h2>Novos chamados</h2>
+    <h2 class="title">Novos chamados</h2>
 
     <div class="asks-wrapper">
         <?php
-        if (isset($_POST['reply'])) {
-            $token = $_POST['token'];
-            $email = $_POST['email'];
-            $calledResponse = $_POST['calledResponse'];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (isset($_POST['reply'])) {
+                $token = $_POST['token'];
+                $email = $_POST['email'];
+                $calledResponse = $_POST['calledResponse'];
 
-            $sql = \MySql::startConnection()->prepare("INSERT INTO call_response VALUES (null,?,?,? )");
-            $sql->execute([$token, $calledResponse, "admin"]);
+                $sql = \MySql::startConnection()->prepare("INSERT INTO call_response VALUES (null,'answered',?,?,'admin')");
+                $sql->execute([$token, $calledResponse]);
 
-            echo '<script>alert("Mensagem enviada!")</script>';
+                echo '<script>alert("Mensagem enviada!")</script>';
+            } elseif (isset($_POST['reply_response'])) {
+                $token = $_POST['token'];
+                $replayResponse = $_POST['replayResponse'];
+                $id = intval($_POST['id']);
+
+                $update = \MySql::startConnection()->prepare("UPDATE call_response SET status = 'answered' WHERE id = ?");
+                $update->execute([$id]);
+
+                $sql = \MySql::startConnection()->prepare("INSERT INTO call_response VALUES (null,'answered',?,?,'admin')");
+                $sql->execute([$token, $replayResponse]);
+
+                echo '<script>alert("Respondido enviada!")</script>';
+            }
+
+            header('Location: ' . dirname($_SERVER['PHP_SELF']) . '/admin');
+            exit;
         }
-
-
         ?>
 
         <?php
@@ -122,7 +139,7 @@
             ?>
             <div class="called-card">
                 <h2><?php echo $value["ask"]; ?></h2>
-                <form method="post">
+                <form action="" method="post">
                     <textarea placeholder="Sua Resposta" name="calledResponse"></textarea>
                     <br>
                     <br>
@@ -136,5 +153,28 @@
         <?php } ?>
     </div>
     <hr>
-    <h2>Últimas interações:</h2>
+    <h2 class="title">Últimas interações:</h2>
+    <?php
+
+    $getCallResponses = \MySql::startConnection()->prepare("SELECT * FROM call_response WHERE user_position = 'user' AND status = 'unanswered' ORDER BY id DESC");
+    $getCallResponses->execute();
+    $getCallResponses = $getCallResponses->fetchAll();
+
+
+    foreach ($getCallResponses as $key => $value) {
+        ?>
+        <div class="called-card">
+            <h2><?php echo $value["message"]; ?></h2>
+            <form action="" method="post">
+                <textarea placeholder="Sua Resposta" name="replayResponse"></textarea>
+                <br>
+                <br>
+                <input class="submit-button" type="submit" name="reply_response" value="Responder">
+                <input type="hidden" name="token" value="<?php echo $value['id_called']; ?>">
+                <input type="hidden" name="id" value="<?php echo $value['id']; ?>">
+            </form>
+
+        </div>
+
+    <?php } ?>
 </div>
